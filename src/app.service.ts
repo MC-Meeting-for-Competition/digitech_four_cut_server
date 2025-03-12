@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { urlencoded } from 'express';
 import * as fs from "fs";
 import multer from 'multer';
 import { v4 as uuid } from "uuid";
@@ -31,11 +32,11 @@ export class AppService {
     }
 
 
-    const { data: publicUrlData } = this.supabase.storage
+    const { data : publicUrlData } = await this.supabase.storage
       .from("photos")
-      .getPublicUrl(`images/${fileName}_${file.originalname}`);
+      .createSignedUrl(`images/${fileName}_${file.originalname}`, 60 * 60);
 
 
-    return `https://mc-meeting-for-competition.github.io/digitech_film_web/?image_url=${publicUrlData.publicUrl}`;
+    return `https://mc-meeting-for-competition.github.io/digitech_film_web?image_url=${encodeURIComponent(publicUrlData!.signedUrl)}`;
   }
 }
